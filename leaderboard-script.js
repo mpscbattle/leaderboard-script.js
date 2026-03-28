@@ -30,7 +30,7 @@ function loadQuestionsFromHTML() {
         const opts = Array.from(qEl.querySelectorAll(".opt")).map(el => el.innerText);
         const ans = parseInt(qEl.getAttribute("data-answer"));
         const explanation = qEl.getAttribute("data-explanation") || "";
-        questions.push({ question: q, options: opts, answer : ans,📝 स्पष्टीकरण : explanation });
+        questions.push({ question: q, options: opts, answer: ans, explanation: explanation });
     });
 }
 
@@ -159,9 +159,9 @@ function showAnalysis() {
         return `<div class='analysis-box'>
             <div class="question-number-circle">${i + 1}</div>
             <b>${q.question}</b>
-            ${q.options.map((opt, j) => `<div class='option ${j === q.answer ? "correct" : (j === userAns ? "wrong" : "")}'>${opt}</div>`).join('')}
+            ${q.options.map((opt, j) => `<div class='option ${j === q.answer ? "Your answer is correct" : (j === userAns ? "Your answer is wrong" : "")}'>${opt}</div>`).join('')}
             <div class='feedback ${feedbackClass}'>${userAns === undefined ? "Not Attempted" : (userAns === q.answer ? "Correct" : "Wrong")}</div>
-            ${q.explanation ? `<div class='explanation-box'><b>Explanation:</b> ${q.explanation}</div>` : ""}
+            ${q.explanation ? `<div class='explanation-box'><b>📝 स्पष्टीकरण :</b> ${q.explanation}</div>` : ""}
         </div>`;
     }).join('');
     setTimeout(() => analysisCard.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
