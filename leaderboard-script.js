@@ -19,8 +19,11 @@ const userNameInput = document.getElementById('userName');
 const saveMessage = document.getElementById('saveMessage');
 const returnToStartBtn = document.getElementById('returnToStartBtn');
 
+// --- स्टेट वेरिएबल्स ---
 let selectedAnswers = [], quizLocked = [], correctCount = 0;
-let timer = 5400, timerStarted = false, timerInterval; 
+// 90 मिनट = 5400 सेकंड
+let timer = 5400, timerInterval; 
+const questions = [];
 
 // HTML से प्रश्न लोड करने वाला फंक्शन
 const questions = [];
@@ -30,7 +33,7 @@ function loadQuestionsFromHTML() {
         const opts = Array.from(qEl.querySelectorAll(".opt")).map(el => el.innerText);
         const ans = parseInt(qEl.getAttribute("data-answer"));
         const explanation = qEl.getAttribute("data-explanation") || "";
-        questions.push({ question: q, options: opts, answer: ans, explanation: explanation });
+        questions.push({ question: q, options: opts, answer : ans, explanation: explanation });
     });
 }
 
@@ -51,7 +54,7 @@ function renderAllQuestions() {
         html += `</div></div>`;
     });
     quizDiv.innerHTML = html;
-    if (questionCountDisplay) questionCountDisplay.textContent = `Question : ${attemptedCount}/${questions.length}`;
+    if (questionCountDisplay) questionCountDisplay.textContent = `Attempted: ${attemptedCount}/${questions.length}`;
     if (progressBar) progressBar.style.width = `${(attemptedCount / questions.length) * 100}%`;
 }
 
@@ -61,23 +64,42 @@ window.selectAnswer = function(qIndex, aIndex) {
     renderAllQuestions(); 
 };
 
+// --- नया HH:MM:SS टाइमर फंक्शन ---
 function updateTimer() {
-    let min = Math.floor(timer / 60);
-    let sec = timer % 60;
-    timerDiv.textContent = `🕛 ${min}:${sec < 10 ? '0' + sec : sec}`;
-    timer--;
-    if (timer < 0) { clearInterval(timerInterval); submitResults(); }
+    let hours = Math.floor(timer / 3600);
+    let minutes = Math.floor((timer % 3600) / 60);
+    let seconds = timer % 60;
+
+    // फॉर्मेटिंग (01:30:00)
+    let hDisplay = hours < 10 ? '0' + hours : hours;
+    let mDisplay = minutes < 10 ? '0' + minutes : minutes;
+    let sDisplay = seconds < 10 ? '0' + seconds : seconds;
+
+    timerDiv.textContent = `🕛 ${hDisplay}:${mDisplay}:${sDisplay}`;
+
+    // चेतावनी: अगर 5 मिनट से कम बचे (300 सेकंड)
+    if (timer < 300) {
+        timerDiv.style.color = "#ff4d4d";
+        timerDiv.style.fontWeight = "bold";
+    }
+
+    if (timer <= 0) { 
+        clearInterval(timerInterval); 
+        submitResults(); 
+    } else {
+        timer--;
+    }
 }
 
 // ... ऊपर का पुराना कोड वैसा ही रहेगा ...
 
 async function saveToGoogleSheet(name, score) {
     if (!name || name.trim() === "") {
-        saveMessage.textContent = "Please enter your name";
+        saveMessage.textContent = "Please enter your name.";
         return;
     }
     const total = questions.length;
-    saveMessage.textContent = "Saving your data, please wait .....";
+    saveMessage.textContent = "Saving...";
     saveMessage.style.color = "blue";
     saveScoreBtn.disabled = true;
 
@@ -88,11 +110,11 @@ async function saveToGoogleSheet(name, score) {
             // बदलाव: यहाँ score/total की जगह केवल score भेजें ताकि सॉर्टिंग आसान हो
             body: JSON.stringify({ name: name.trim(), score: score, testId: TEST_ID })
         });
-        saveMessage.textContent = `Your score has been saved successfully`;
-        saveMessage.style.color = '#00994d';
+        saveMessage.textContent = `Saved! ✅`;
+        saveMessage.style.color = '#008f6b';
         displayLeaderboard();
     } catch (e) {
-        saveMessage.textContent = "Error. Try again";
+        saveMessage.textContent = "Error. Try again.";
         saveScoreBtn.disabled = false;
     }
 }
@@ -109,7 +131,7 @@ async function displayLeaderboard() {
         
         tbody.innerHTML = ''; 
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3">No scores yet</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3">No scores yet.</td></tr>';
         } else {
             // बदलाव: row[1] अब स्कोर दिखाएगा क्योंकि Apps Script में हमने इसे सही किया है
             data.forEach((row, i) => {
@@ -123,7 +145,7 @@ async function displayLeaderboard() {
             });
         }
     } catch (error) {
-        tbody.innerHTML = '<tr><td colspan="3">Check Connection</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3">Check Connection.</td></tr>';
     }
 }
 
@@ -159,7 +181,7 @@ function showAnalysis() {
         return `<div class='analysis-box'>
             <div class="question-number-circle">${i + 1}</div>
             <b>${q.question}</b>
-            ${q.options.map((opt, j) => `<div class='option ${j === q.answer ? "Your answer is correct" : (j === userAns ? "Your answer is wrong" : "")}'>${opt}</div>`).join('')}
+            ${q.options.map((opt, j) => `<div class='option ${j === q.answer ? "correct" : (j === userAns ? "wrong" : "")}'>${opt}</div>`).join('')}
             <div class='feedback ${feedbackClass}'>${userAns === undefined ? "Not Attempted" : (userAns === q.answer ? "Correct" : "Wrong")}</div>
             ${q.explanation ? `<div class='explanation-box'><b>📝 स्पष्टीकरण :</b> ${q.explanation}</div>` : ""}
         </div>`;
