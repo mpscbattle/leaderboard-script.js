@@ -69,6 +69,8 @@ function updateTimer() {
     if (timer < 0) { clearInterval(timerInterval); submitResults(); }
 }
 
+// ... ऊपर का पुराना कोड वैसा ही रहेगा ...
+
 async function saveToGoogleSheet(name, score) {
     if (!name || name.trim() === "") {
         saveMessage.textContent = "Please enter your name.";
@@ -83,7 +85,8 @@ async function saveToGoogleSheet(name, score) {
         await fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
-            body: JSON.stringify({ name: name.trim(), score: `${score}/${total}`, testId: TEST_ID })
+            // बदलाव: यहाँ score/total की जगह केवल score भेजें ताकि सॉर्टिंग आसान हो
+            body: JSON.stringify({ name: name.trim(), score: score, testId: TEST_ID })
         });
         saveMessage.textContent = `Saved! ✅`;
         saveMessage.style.color = '#008f6b';
@@ -103,12 +106,29 @@ async function displayLeaderboard() {
     try {
         const response = await fetch(`${SCRIPT_URL}?testId=${TEST_ID}`);
         const data = await response.json();
-        tbody.innerHTML = data.length === 0 ? '<tr><td colspan="3">No scores yet.</td></tr>' : 
-            data.map((row, i) => `<tr><td>${i+1}</td><td>${row[0]}</td><td>${row[1]}</td></tr>`).join('');
+        
+        tbody.innerHTML = ''; 
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3">No scores yet.</td></tr>';
+        } else {
+            // बदलाव: row[1] अब स्कोर दिखाएगा क्योंकि Apps Script में हमने इसे सही किया है
+            data.forEach((row, i) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${i + 1}</td>
+                    <td>${row[0]}</td>
+                    <td>${row[1]} / ${questions.length}</td> 
+                `;
+                tbody.appendChild(tr);
+            });
+        }
     } catch (error) {
         tbody.innerHTML = '<tr><td colspan="3">Check Connection.</td></tr>';
     }
 }
+
+// ... नीचे का बाकी कोड (submitResults, showAnalysis, आदि) वैसा ही रहेगा ...
+
 
 function submitResults() {
     clearInterval(timerInterval);
