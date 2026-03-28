@@ -1,5 +1,6 @@
 
 
+
 const quizDiv = document.getElementById("quiz");
 const timerDiv = document.getElementById("timer");
 const submitBtn = document.getElementById("submitBtn");
@@ -56,7 +57,7 @@ function renderAllQuestions() {
         html += `</div></div>`;
     });
     quizDiv.innerHTML = html;
-    if (questionCountDisplay) questionCountDisplay.textContent = `Attempted: ${attemptedCount}/${questions.length}`;
+    if (questionCountDisplay) questionCountDisplay.textContent = `Questions : ${attemptedCount}/${questions.length}`;
     if (progressBar) progressBar.style.width = `${(attemptedCount / questions.length) * 100}%`;
 }
 
@@ -128,7 +129,7 @@ function showAnalysis() {
             <b>${q.question}</b>
             ${q.options.map((opt, j) => `<div class='option ${j === q.answer ? "correct" : (j === userAns ? "wrong" : "")}'>${opt}</div>`).join('')}
             <div class='feedback ${feedbackClass}'>${userAns === undefined ? "Not Attempted" : (userAns === q.answer ? "Correct" : "Wrong")}</div>
-            ${q.explanation ? `<div class='explanation-box'><b>Explanation:</b> ${q.explanation}</div>` : ""}
+            ${q.explanation ? `<div class='explanation-box'><b>📝 स्पष्टीकरण :</b> ${q.explanation}</div>` : ""}
         </div>`;
     }).join('');
     setTimeout(() => analysisCard.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
@@ -137,7 +138,7 @@ function showAnalysis() {
 // --- 6. गूगल शीट पर स्कोर सेव करना ---
 async function saveToGoogleSheet(name, score) {
     if (!name || name.trim() === "") {
-        saveMessage.textContent = "Please enter your name.";
+        saveMessage.textContent = "Please enter your name";
         return;
     }
     saveMessage.textContent = "Saving...";
@@ -150,11 +151,11 @@ async function saveToGoogleSheet(name, score) {
             mode: 'no-cors',
             body: JSON.stringify({ name: name.trim(), score: score, testId: TEST_ID })
         });
-        saveMessage.textContent = `Saved! ✅`;
+        saveMessage.textContent = `Saved`;
         saveMessage.style.color = '#008f6b';
         displayLeaderboard();
     } catch (e) {
-        saveMessage.textContent = "Error. Try again.";
+        saveMessage.textContent = "Error. Try again";
         saveScoreBtn.disabled = false;
     }
 }
@@ -171,7 +172,7 @@ async function displayLeaderboard() {
         const data = await response.json();
         tbody.innerHTML = ''; 
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3">No scores yet.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3">No scores yet</td></tr>';
         } else {
             data.forEach((row, i) => {
                 const tr = document.createElement('tr');
@@ -180,7 +181,7 @@ async function displayLeaderboard() {
             });
         }
     } catch (error) {
-        tbody.innerHTML = '<tr><td colspan="3">Check Connection.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3">Check Connection</td></tr>';
     }
 }
 
