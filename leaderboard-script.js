@@ -30,13 +30,16 @@ const questions = [];
 // --- 1. HTML से प्रश्न लोड करना ---
 function loadQuestionsFromHTML() {
     questions.length = 0; // Clear array
-    document.querySelectorAll(".question-data").forEach(qEl => {
-        const q = qEl.querySelector(".q").innerText;
-        const opts = Array.from(qEl.querySelectorAll(".opt")).map(el => el.innerText);
-        const ans = parseInt(qEl.getAttribute("data-answer"));
-        const explanation = qEl.getAttribute("data-explanation") || "";
-        questions.push({ question: q, options: opts, answer : ans, explanation: explanation });
-    });
+    // पुराना कोड बदलें:
+document.querySelectorAll(".question-data").forEach(qEl => {
+  // innerText की जगह innerHTML इस्तेमाल करें ताकि इमेज टैग भी आ सके
+  const q = qEl.querySelector(".q").innerHTML; 
+  const opts = Array.from(qEl.querySelectorAll(".opt")).map(el => el.innerHTML);
+  const ans = parseInt(qEl.getAttribute("data-answer"));
+  const explanation = qEl.getAttribute("data-explanation") || "";
+  questions.push({ question: q, options: opts, answer : ans, explanation: explanation });
+});
+
 }
 
 // --- 2. प्रश्न रेंडर करना ---
