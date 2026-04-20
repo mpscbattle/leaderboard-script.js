@@ -39,7 +39,7 @@ document.querySelectorAll(".question-data").forEach(qEl => {
   const explanation = qEl.getAttribute("data-explanation") || "";
   questions.push({ question: q, options: opts, answer : ans, explanation: explanation });
 });
-
+    
 }
 
 // --- 2. प्रश्न रेंडर करना ---
